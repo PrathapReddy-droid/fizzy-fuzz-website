@@ -535,16 +535,39 @@
 
 <button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
-<script>
-// ── Page routing ──
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── Hash-based routing ──
+const ROUTE_MAP = { '': 'home', 'home': 'home', 'privacy': 'privacy', 'terms': 'terms' };
+const NAV_ID_MAP = { 'home': 'nav-home', 'privacy': 'nav-pp', 'terms': 'nav-tc' };
+const PAGE_TITLES = { 'home': 'Fizzy Fuzz – Next Level Shoppie', 'privacy': 'Privacy Policy – Fizzy Fuzz', 'terms': 'Terms & Conditions – Fizzy Fuzz' };
+
 function showPage(id) {
+  const hash = id === 'home' ? '' : id;
+  history.pushState(null, '', hash ? '#' + hash : location.pathname + location.search);
+  renderPage(id);
+}
+
+function renderPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  const nb = document.getElementById('nav-' + (id === 'home' ? 'home' : id === 'privacy' ? 'pp' : 'tc'));
+  const nb = document.getElementById(NAV_ID_MAP[id]);
   if (nb) nb.classList.add('active');
+  document.title = PAGE_TITLES[id] || PAGE_TITLES['home'];
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
+
+// Handle back/forward navigation
+window.addEventListener('popstate', () => {
+  const hash = location.hash.replace('#', '');
+  renderPage(ROUTE_MAP[hash] || 'home');
+});
+
+// Load correct page on initial load
+(function() {
+  const hash = location.hash.replace('#', '');
+  renderPage(ROUTE_MAP[hash] || 'home');
+})();
 
 // ── Accordion builder ──
 function buildAccordion(containerId, sections) {
