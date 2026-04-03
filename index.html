@@ -630,14 +630,14 @@ const TC_SECTIONS = [
   { icon: '🔄', title: '13. Amendments to Terms', content: ['FizzyFuzz reserves the right to update or amend these Terms at any time. Sellers will be notified of material changes via email or a prominent notice on the Platform.', 'Continued use of the Platform following the posting of revised Terms constitutes your acceptance of those changes. It is your responsibility to review these Terms periodically.'] },
 ];
 
-// Build accordions
+// ── Build both accordions ──
 buildAccordion('pp-accordion', PP_SECTIONS);
 buildAccordion('tc-accordion', TC_SECTIONS);
 
-// Scroll-to-top
+// ── Scroll-to-top button ──
 window.addEventListener('scroll', () => {
   const btn = document.getElementById('scrollTopBtn');
-  btn.classList.toggle('visible', window.scrollY > 300);
+  if (btn) btn.classList.toggle('visible', window.scrollY > 300);
 });
 </script>
 </body>
