@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fizzy Fuzz – Next Level Shoppie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #f59e0b;
+    --gold-light: #fcd34d;
+    --gold-dark: #d97706;
+    --orange: #fb923c;
+    --bg: #080603;
+    --bg2: #0d0b07;
+    --bg3: #130d00;
+    --text: #fff;
+    --text-dim: rgba(255,255,255,0.45);
+    --text-dimmer: rgba(255,255,255,0.25);
+    --border: rgba(245,158,11,0.18);
+    --border-subtle: rgba(255,255,255,0.07);
+    --serif: 'DM Serif Display', serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ───── PAGE SYSTEM ───── */
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: block; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ───── NAV ───── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; height: 64px;
+    background: rgba(8,6,3,0.88);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .nav-logo {
+    font-family: var(--serif); font-size: 22px; cursor: pointer;
+    background: linear-gradient(135deg, #fcd34d, #fb923c);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    letter-spacing: -0.5px;
+  }
+  .nav-links { display: flex; gap: 6px; align-items: center; }
+  .nav-btn {
+    background: none; border: 1px solid transparent; color: var(--text-dim);
+    font-family: var(--sans); font-size: 13px; font-weight: 500;
+    padding: 7px 16px; border-radius: 100px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { color: #fff; border-color: var(--border-subtle); }
+  .nav-btn.active { color: var(--gold-light); border-color: var(--border); background: rgba(245,158,11,0.08); }
+  .nav-cta {
+    background: linear-gradient(135deg, var(--gold), var(--orange));
+    border: none; color: #000; font-family: var(--sans); font-size: 13px;
+    font-weight: 700; padding: 8px 20px; border-radius: 100px; cursor: pointer;
+    transition: opacity 0.2s; letter-spacing: 0.3px;
+  }
+  .nav-cta:hover { opacity: 0.88; }
+
+  /* ───── HERO ───── */
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 120px 24px 80px;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(245,158,11,0.08) 0%, transparent 70%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(245,158,11,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,158,11,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black 0%, transparent 80%);
+  }
+  .hero-orb {
+    position: absolute; border-radius: 50%; pointer-events: none;
+    animation: pulse 6s ease-in-out infinite;
+  }
+  .hero-orb-1 { width: 400px; height: 400px; top: 5%; left: -10%; background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%); }
+  .hero-orb-2 { width: 300px; height: 300px; bottom: 10%; right: -8%; background: radial-gradient(circle, rgba(249,115,22,0.07) 0%, transparent 70%); animation-delay: -3s; }
+  @keyframes pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(245,158,11,0.1); border: 1px solid var(--border);
+    border-radius: 100px; padding: 5px 16px;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    color: var(--gold-light); text-transform: uppercase; margin-bottom: 24px;
+    position: relative; z-index: 1;
+  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold-light); animation: blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .hero-title {
+    font-family: var(--serif); font-size: clamp(48px, 8vw, 96px);
+    line-height: 1.05; color: #fff; margin-bottom: 10px;
+    position: relative; z-index: 1;
+  }
+  .hero-title em {
+    font-style: italic;
+    background: linear-gradient(135deg, #fcd34d 0%, #fb923c 60%, #ef4444 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero-sub {
+    font-size: clamp(15px, 2vw, 19px); color: var(--text-dim);
+    max-width: 540px; line-height: 1.7; margin-bottom: 40px;
+    position: relative; z-index: 1;
+  }
+  .hero-actions {
+    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+    position: relative; z-index: 1;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold), var(--orange));
+    border: none; color: #000; font-family: var(--sans);
+    font-size: 15px; font-weight: 700; padding: 14px 32px;
+    border-radius: 100px; cursor: pointer; letter-spacing: 0.3px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 30px rgba(245,158,11,0.2);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(245,158,11,0.35); }
+  .btn-secondary {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle);
+    color: #fff; font-family: var(--sans); font-size: 15px; font-weight: 500;
+    padding: 14px 32px; border-radius: 100px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--border); background: rgba(245,158,11,0.06); }
+
+  .hero-stats {
+    display: flex; gap: 40px; margin-top: 64px; flex-wrap: wrap; justify-content: center;
+    position: relative; z-index: 1;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-family: var(--serif); font-size: 32px; color: var(--gold-light); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-dimmer); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; }
+
+  /* ───── SECTION LABELS ───── */
+  .section-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(245,158,11,0.08); border: 1px solid var(--border);
+    border-radius: 100px; padding: 4px 14px;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    color: var(--gold-light); text-transform: uppercase; margin-bottom: 16px;
+  }
+
+  /* ───── DUAL SECTION ───── */
+  .dual { padding: 100px 40px; max-width: 1200px; margin: 0 auto; }
+  .dual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media(max-width:768px) { .dual-grid { grid-template-columns: 1fr; } nav { padding: 0 20px; } .dual { padding: 60px 20px; } }
+
+  .audience-card {
+    background: linear-gradient(135deg, rgba(19,13,0,0.98), rgba(13,13,10,0.96));
+    border: 1px solid var(--border);
+    border-radius: 24px; padding: 40px;
+    position: relative; overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: default;
+  }
+  .audience-card::before {
+    content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(245,158,11,0.6), transparent);
+  }
+  .audience-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(245,158,11,0.25); }
+  .card-icon-wrap {
+    width: 56px; height: 56px; border-radius: 16px; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+    background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(249,115,22,0.12));
+    border: 1px solid rgba(245,158,11,0.25);
+  }
+  .card-title { font-family: var(--serif); font-size: 28px; margin-bottom: 10px; }
+  .card-title em { font-style: italic; background: linear-gradient(135deg, #fcd34d, #fb923c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .card-desc { font-size: 14px; color: var(--text-dim); line-height: 1.75; margin-bottom: 28px; }
+  .card-features { list-style: none; margin-bottom: 32px; }
+  .card-features li {
+    font-size: 13.5px; color: rgba(255,255,255,0.55);
+    padding: 10px 0; border-bottom: 1px solid var(--border-subtle);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-features li:last-child { border-bottom: none; }
+  .feat-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold-light); flex-shrink: 0; }
+  .card-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--gold), var(--orange));
+    border: none; color: #000; font-family: var(--sans);
+    font-size: 14px; font-weight: 700; padding: 12px 26px;
+    border-radius: 100px; cursor: pointer; transition: opacity 0.2s;
+    letter-spacing: 0.3px; width: 100%; justify-content: center;
+  }
+  .card-btn:hover { opacity: 0.88; }
+  .card-btn-outline {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle);
+    color: #fff; font-family: var(--sans); font-size: 14px; font-weight: 500;
+    padding: 12px 26px; border-radius: 100px; cursor: pointer;
+    transition: all 0.2s; width: 100%; justify-content: center;
+  }
+  .card-btn-outline:hover { border-color: var(--border); background: rgba(245,158,11,0.06); }
+
+  /* ───── FEATURES STRIP ───── */
+  .features { padding: 0 40px 100px; max-width: 1200px; margin: 0 auto; }
+  .features-header { text-align: center; margin-bottom: 56px; }
+  .features-title { font-family: var(--serif); font-size: clamp(28px, 4vw, 44px); margin-bottom: 12px; }
+  .features-title em { font-style: italic; background: linear-gradient(135deg, #fcd34d, #fb923c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .features-sub { font-size: 15px; color: var(--text-dim); max-width: 440px; margin: 0 auto; line-height: 1.7; }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media(max-width:900px) { .features-grid { grid-template-columns: 1fr 1fr; } .features { padding: 0 20px 60px; } }
+  @media(max-width:560px) { .features-grid { grid-template-columns: 1fr; } }
+  .feature-card {
+    background: rgba(255,255,255,0.025); border: 1px solid var(--border-subtle);
+    border-radius: 16px; padding: 28px 24px;
+    transition: border-color 0.25s;
+  }
+  .feature-card:hover { border-color: rgba(245,158,11,0.2); }
+  .feature-icon { font-size: 24px; margin-bottom: 14px; }
+  .feature-name { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .feature-desc { font-size: 13px; color: var(--text-dim); line-height: 1.65; }
+
+  /* ───── BANNER ───── */
+  .banner {
+    margin: 0 40px 100px;
+    background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(249,115,22,0.08));
+    border: 1px solid var(--border); border-radius: 20px;
+    padding: 48px 56px; display: flex; align-items: center; justify-content: space-between;
+    gap: 32px; flex-wrap: wrap; position: relative; overflow: hidden;
+    max-width: 1120px; margin-left: auto; margin-right: auto; margin-bottom: 100px;
+  }
+  .banner::before { content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px; background: linear-gradient(90deg, transparent, rgba(245,158,11,0.6), transparent); }
+  .banner-text h2 { font-family: var(--serif); font-size: 32px; margin-bottom: 10px; }
+  .banner-text h2 em { font-style: italic; background: linear-gradient(135deg, #fcd34d, #fb923c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .banner-text p { font-size: 14px; color: var(--text-dim); max-width: 420px; line-height: 1.7; }
+  @media(max-width:640px) { .banner { margin: 0 20px 60px; padding: 32px 24px; } }
+
+  /* ───── FOOTER ───── */
+  footer {
+    border-top: 1px solid var(--border-subtle);
+    padding: 40px; text-align: center;
+  }
+  .footer-logo { font-family: var(--serif); font-size: 28px; background: linear-gradient(135deg, #fcd34d, #fb923c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 12px; }
+  .footer-links { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+  .footer-link { font-size: 13px; color: var(--text-dim); cursor: pointer; transition: color 0.2s; background: none; border: none; font-family: var(--sans); }
+  .footer-link:hover { color: var(--gold-light); }
+  .footer-copy { font-size: 12px; color: var(--text-dimmer); }
+
+  /* ───── LEGAL PAGES ───── */
+  .legal-page { padding: 96px 24px 64px; max-width: 800px; margin: 0 auto; }
+
+  /* Legal Hero */
+  .lp-hero {
+    background: linear-gradient(135deg, rgba(19,13,0,0.98), rgba(13,13,10,0.96), rgba(18,9,0,0.98));
+    border: 1px solid var(--border); border-radius: 20px;
+    padding: 36px 36px 32px; margin-bottom: 20px;
+    position: relative; overflow: hidden;
+  }
+  .lp-hero::before { content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px; background: linear-gradient(90deg, transparent, rgba(245,158,11,0.6), transparent); }
+  .lp-hero::after { content: ''; position: absolute; bottom: -40px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%); pointer-events: none; }
+  .lp-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 100px; padding: 4px 14px; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: var(--gold-light); text-transform: uppercase; margin-bottom: 16px; }
+  .lp-title { font-family: var(--serif); font-size: 32px; line-height: 1.15; color: #fff; margin-bottom: 10px; }
+  .lp-title em { font-style: italic; background: linear-gradient(135deg, #fcd34d, #fb923c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .lp-meta { font-size: 13px; color: rgba(255,255,255,0.35); margin-bottom: 20px; }
+  .lp-chips { display: flex; gap: 10px; flex-wrap: wrap; }
+  .lp-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 100px; padding: 5px 14px; font-size: 12px; color: rgba(255,255,255,0.45); }
+
+  /* Disclaimer */
+  .lp-disclaimer { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.18); border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; font-size: 12.5px; color: rgba(255,255,255,0.45); line-height: 1.65; }
+  .lp-disclaimer strong { color: rgba(255,255,255,0.65); }
+
+  /* Accordion */
+  .acc-section { background: rgba(255,255,255,0.025); border: 1px solid var(--border-subtle); border-radius: 14px; margin-bottom: 10px; overflow: hidden; transition: border-color 0.25s; }
+  .acc-section:hover { border-color: rgba(245,158,11,0.2); }
+  .acc-header { width: 100%; display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: none; border: none; cursor: pointer; text-align: left; transition: background 0.2s; }
+  .acc-header:hover { background: rgba(245,158,11,0.05); }
+  .acc-icon { width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(249,115,22,0.12)); border: 1px solid rgba(245,158,11,0.2); font-size: 14px; }
+  .acc-title { flex: 1; font-size: 14px; font-weight: 600; color: #fff; letter-spacing: 0.2px; }
+  .acc-chevron { color: rgba(255,255,255,0.3); flex-shrink: 0; transition: all 0.2s; font-size: 14px; }
+  .acc-header:hover .acc-chevron { color: var(--gold-light); }
+  .acc-header[aria-expanded="true"] .acc-chevron { transform: rotate(180deg); color: var(--gold-light); }
+  .acc-body { display: none; padding: 4px 20px 20px 64px; border-top: 1px solid var(--border-subtle); }
+  .acc-body.open { display: block; }
+  @media(max-width:520px) { .acc-body { padding: 12px 16px 18px; } }
+  .acc-para { font-size: 13.5px; line-height: 1.75; color: rgba(255,255,255,0.5); margin-bottom: 10px; }
+  .acc-para:last-child { margin-bottom: 0; }
+  .acc-para::before { content: '–'; color: rgba(245,158,11,0.5); margin-right: 8px; font-weight: 700; }
+
+  /* Contact card */
+  .lp-contact { background: rgba(12,8,0,0.7); border: 1px solid rgba(245,158,11,0.15); border-radius: 16px; padding: 24px 28px; margin-top: 10px; position: relative; overflow: hidden; }
+  .lp-contact::before { content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px; background: linear-gradient(90deg, transparent, rgba(245,158,11,0.45), transparent); }
+  .lp-contact-title { font-family: var(--serif); font-size: 16px; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .lp-contact-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(245,158,11,0.25), rgba(249,115,22,0.15)); font-size: 13px; }
+  .lp-contact-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media(max-width:600px) { .lp-contact-grid { grid-template-columns: 1fr; } }
+  .lp-contact-item { display: flex; align-items: flex-start; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 14px; }
+  .lp-contact-item-icon { width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(249,115,22,0.1)); font-size: 13px; }
+  .lp-contact-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 3px; }
+  .lp-contact-value { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+
+  /* TC footer */
+  .tc-footer { background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 20px 24px; margin-top: 10px; display: flex; align-items: center; gap: 14px; }
+  .tc-footer-icon { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(249,115,22,0.1)); font-size: 16px; }
+  .tc-footer-text { font-size: 12.5px; color: rgba(255,255,255,0.35); line-height: 1.6; }
+  .tc-footer-text strong { color: rgba(255,255,255,0.6); }
+
+  /* ───── SCROLL TOP ───── */
+  .scroll-top { position: fixed; bottom: 28px; right: 28px; z-index: 200; width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--orange)); border: none; color: #000; font-size: 18px; cursor: pointer; box-shadow: 0 4px 20px rgba(245,158,11,0.3); transition: opacity 0.2s, transform 0.2s; display: none; align-items: center; justify-content: center; }
+  .scroll-top:hover { transform: translateY(-2px); }
+  .scroll-top.visible { display: flex; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">Fizzy Fuzz</div>
+  <div class="nav-links">
+    <button class="nav-btn active" id="nav-home" onclick="showPage('home')">Home</button>
+    <button class="nav-btn" id="nav-pp" onclick="showPage('privacy')">Privacy</button>
+    <button class="nav-btn" id="nav-tc" onclick="showPage('terms')">Terms</button>
+    <button class="nav-cta" onclick="showPage('home')">Get Started</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     HOME PAGE
+═══════════════════════════════════════ -->
+<div id="page-home" class="page active">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-badge"><div class="badge-dot"></div> Next Level Shoppie</div>
+    <h1 class="hero-title">Buy. Sell.<br><em>Thrive.</em></h1>
+    <p class="hero-sub">Fizzy Fuzz is India's freshest marketplace — connecting passionate sellers with savvy buyers across every category.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('dual-section').scrollIntoView({behavior:'smooth'})">Explore the Platform ↓</button>
+      <button class="btn-secondary" onclick="showPage('terms')">Read Terms</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">50K+</div><div class="stat-label">Active Sellers</div></div>
+      <div class="stat"><div class="stat-num">2M+</div><div class="stat-label">Products Listed</div></div>
+      <div class="stat"><div class="stat-num">10M+</div><div class="stat-label">Happy Buyers</div></div>
+      <div class="stat"><div class="stat-num">4.8★</div><div class="stat-label">Avg Rating</div></div>
+    </div>
+  </section>
+
+  <!-- Dual Cards -->
+  <section class="dual" id="dual-section">
+    <div style="text-align:center; margin-bottom:56px;">
+      <div class="section-tag">🎯 Built for Everyone</div>
+      <h2 class="features-title">Who are you on<br><em>Fizzy Fuzz?</em></h2>
+      <p class="features-sub" style="margin-top:10px;">Whether you're here to sell your craft or discover your next obsession — we've got you.</p>
+    </div>
+    <div class="dual-grid">
+
+      <!-- Seller Card -->
+      <div class="audience-card">
+        <div class="card-icon-wrap">🏪</div>
+        <h3 class="card-title">I'm a <em>Seller</em></h3>
+        <p class="card-desc">Launch your store, manage inventory, and reach millions of buyers across India. Fizzy Fuzz gives sellers the tools to grow without the hassle.</p>
+        <ul class="card-features">
+          <li><span class="feat-dot"></span> Easy dashboard — list products in minutes</li>
+          <li><span class="feat-dot"></span> Weekly payouts directly to your bank</li>
+          <li><span class="feat-dot"></span> Built-in logistics with top delivery partners</li>
+          <li><span class="feat-dot"></span> Real-time analytics & sales insights</li>
+          <li><span class="feat-dot"></span> Seller protection & dispute resolution</li>
+          <li><span class="feat-dot"></span> Free onboarding support for new sellers</li>
+        </ul>
+        <button class="card-btn" onclick="window.location.href='https://seller.fizzyfuzz.in/login'">Start Selling Free →</button>
+        <div style="margin-top:12px; font-size:12px; color:var(--text-dimmer); text-align:center;">
+          By registering, you agree to our <span style="color:var(--gold-light); cursor:pointer;" onclick="showPage('terms')">Seller Terms</span>
+        </div>
+      </div>
+
+      <!-- Buyer Card -->
+      <div class="audience-card">
+        <div class="card-icon-wrap">🛍️</div>
+        <h3 class="card-title">I'm a <em>Buyer</em></h3>
+        <p class="card-desc">Discover unique products from thousands of sellers. Enjoy fast delivery, easy returns, and a shopping experience that actually feels fun.</p>
+        <ul class="card-features">
+          <li><span class="feat-dot"></span> 2M+ products across every category</li>
+          <li><span class="feat-dot"></span> Secure checkout with multiple payment options</li>
+          <li><span class="feat-dot"></span> 7-day hassle-free returns on eligible items</li>
+          <li><span class="feat-dot"></span> Live order tracking from warehouse to door</li>
+          <li><span class="feat-dot"></span> Exclusive deals & flash sale events</li>
+          <li><span class="feat-dot"></span> 24/7 buyer support & protection</li>
+        </ul>
+        <button class="card-btn">Shop Now →</button>
+        <div style="margin-top:12px; font-size:12px; color:var(--text-dimmer); text-align:center;">
+          By shopping, you agree to our <span style="color:var(--gold-light); cursor:pointer;" onclick="showPage('privacy')">Privacy Policy</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="features-header">
+      <div class="section-tag">✨ Platform Features</div>
+      <h2 class="features-title">Everything you need,<br><em>nothing you don't</em></h2>
+      <p class="features-sub">Fizzy Fuzz is engineered for speed, trust, and delight — at every step.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">🔒</div><div class="feature-name">Secure Transactions</div><div class="feature-desc">End-to-end encrypted payments with PCI-DSS compliant infrastructure.</div></div>
+      <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-name">Lightning Fast</div><div class="feature-desc">Optimised for low-bandwidth connections — loads in under 1 second anywhere in India.</div></div>
+      <div class="feature-card"><div class="feature-icon">📦</div><div class="feature-name">Smart Fulfilment</div><div class="feature-desc">Integrated logistics network with 500+ delivery partners for pan-India coverage.</div></div>
+      <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-name">Seller Analytics</div><div class="feature-desc">Real-time dashboards showing revenue, traffic, conversion rates, and top products.</div></div>
+      <div class="feature-card"><div class="feature-icon">🤝</div><div class="feature-name">Buyer Protection</div><div class="feature-desc">100% refund guarantee for items not received or significantly not as described.</div></div>
+      <div class="feature-card"><div class="feature-icon">🌐</div><div class="feature-name">Multi-language</div><div class="feature-desc">Available in English, Tamil, Hindi, Telugu, and Malayalam — for every Indian shopper.</div></div>
+    </div>
+  </section>
+
+  <!-- Banner CTA -->
+  <div class="banner">
+    <div class="banner-text">
+      <h2>Ready to join<br><em>Fizzy Fuzz?</em></h2>
+      <p>Whether you're a first-time seller or a daily shopper — your journey starts here. No fees to join, no hidden charges.</p>
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <button class="btn-primary" onclick="window.location.href='https://seller.fizzyfuzz.in'">Create Account →</button>
+      <button class="btn-secondary" onclick="showPage('privacy')">Privacy Policy</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-logo">Fizzy Fuzz</div>
+    <div class="footer-links">
+      <button class="footer-link" onclick="showPage('home')">Home</button>
+      <button class="footer-link" onclick="showPage('privacy')">Privacy Policy</button>
+      <button class="footer-link" onclick="showPage('terms')">Terms & Conditions</button>
+    </div>
+    <div class="footer-copy">© 2025 Fizzy Fuzz – Next Level Shoppie. Kolathur, Chennai – 600099, Tamil Nadu, India.</div>
+  </footer>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     PRIVACY POLICY PAGE
+═══════════════════════════════════════ -->
+<div id="page-privacy" class="page">
+  <div class="legal-page">
+
+    <div class="lp-hero">
+      <div class="lp-badge">🛡️ Privacy Policy</div>
+      <h1 class="lp-title">Your Privacy, Our <em>Commitment</em></h1>
+      <p class="lp-meta">Last updated: 3 April 2025 · Fizzy Fuzz – Next Level Shoppie</p>
+      <div class="lp-chips">
+        <div class="lp-chip">🌐 Governed by Indian Law</div>
+        <div class="lp-chip">📍 Chennai, Tamil Nadu</div>
+        <div class="lp-chip">📄 13 Sections</div>
+      </div>
+    </div>
+
+    <div class="lp-disclaimer">
+      <strong>Disclaimer:</strong> If there is any difference between the English version and any translated version of this Privacy Policy, the English version will take precedence. Fizzy Fuzz respects the privacy of its users and is committed to protecting your personal information and ensuring safe transactions.
+    </div>
+
+    <div id="pp-accordion"></div>
+
+    <div class="lp-contact">
+      <div class="lp-contact-title"><div class="lp-contact-icon">📞</div> Contact Information</div>
+      <div class="lp-contact-grid">
+        <div class="lp-contact-item"><div class="lp-contact-item-icon">📍</div><div><div class="lp-contact-label">Address</div><div class="lp-contact-value">S1 Avenue, Anugraha Theatre Street, Shanthi Nagar, Kolathur, Chennai – 600099, Tamil Nadu, India</div></div></div>
+        <div class="lp-contact-item"><div class="lp-contact-item-icon">📞</div><div><div class="lp-contact-label">Phone</div><div class="lp-contact-value">+91 94227 99343</div></div></div>
+        <div class="lp-contact-item"><div class="lp-contact-item-icon">✉️</div><div><div class="lp-contact-label">Email</div><div class="lp-contact-value">info@fizzyfuzz.in</div></div></div>
+      </div>
+    </div>
+
+  </div>
+  <footer style="border-top:1px solid var(--border-subtle);padding:32px;text-align:center;">
+    <div class="footer-links">
+      <button class="footer-link" onclick="showPage('home')">← Home</button>
+      <button class="footer-link" onclick="showPage('terms')">Terms & Conditions</button>
+    </div>
+    <div class="footer-copy" style="margin-top:12px;">© 2025 Fizzy Fuzz – Next Level Shoppie</div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════
+     TERMS & CONDITIONS PAGE
+═══════════════════════════════════════ -->
+<div id="page-terms" class="page">
+  <div class="legal-page">
+
+    <div class="lp-hero">
+      <div class="lp-badge">📋 Legal Document</div>
+      <h1 class="lp-title">Seller Terms &amp; <em>Conditions</em></h1>
+      <p class="lp-meta">Last updated: 3 April 2025 · Effective for all FizzyFuzz Seller accounts</p>
+      <div class="lp-chips">
+        <div class="lp-chip">🌐 Governed by Indian Law</div>
+        <div class="lp-chip">⚖️ Jurisdiction: Bengaluru, KA</div>
+        <div class="lp-chip">📄 13 Sections</div>
+      </div>
+    </div>
+
+    <div id="tc-accordion"></div>
+
+    <div class="tc-footer">
+      <div class="tc-footer-icon">📞</div>
+      <p class="tc-footer-text">Questions about these Terms? Contact our Seller Support team at <strong>support@fizzyfuzz.in</strong> or reach our Grievance Officer at <strong>grievance@fizzyfuzz.in</strong>. We respond within 30 days.</p>
+    </div>
+
+  </div>
+  <footer style="border-top:1px solid var(--border-subtle);padding:32px;text-align:center;">
+    <div class="footer-links">
+      <button class="footer-link" onclick="showPage('home')">← Home</button>
+      <button class="footer-link" onclick="showPage('privacy')">Privacy Policy</button>
+    </div>
+    <div class="footer-copy" style="margin-top:12px;">© 2025 Fizzy Fuzz – Next Level Shoppie</div>
+  </footer>
+</div>
+
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// ── Page routing ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const nb = document.getElementById('nav-' + (id === 'home' ? 'home' : id === 'privacy' ? 'pp' : 'tc'));
+  if (nb) nb.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+// ── Accordion builder ──
+function buildAccordion(containerId, sections) {
+  const container = document.getElementById(containerId);
+  sections.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'acc-section';
+    const isOpen = i < 2;
+    div.innerHTML = `
+      <button class="acc-header" aria-expanded="${isOpen}" onclick="toggleAcc(this)">
+        <div class="acc-icon">${s.icon}</div>
+        <span class="acc-title">${s.title}</span>
+        <span class="acc-chevron">⌄</span>
+      </button>
+      <div class="acc-body ${isOpen ? 'open' : ''}">
+        ${s.content.map(p => `<p class="acc-para">${p}</p>`).join('')}
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function toggleAcc(btn) {
+  const body = btn.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  btn.setAttribute('aria-expanded', String(!isOpen));
+}
+
+// ── Privacy sections ──
+const PP_SECTIONS = [
+  { icon: '👁️', title: '1. Information We Collect', content: ['When you use the Fizzy Fuzz platform, we may collect certain personal information from you including: Name, Phone number, Email address, Delivery address, Payment information, and Account login information.', 'You may provide this information when creating an account, placing an order, contacting customer support, or participating in promotions or offers.', 'Some parts of the platform may be accessed without creating an account. However, certain services require registration.'] },
+  { icon: '🗄️', title: '2. Information Collected Automatically', content: ['When you use our platform, we may automatically collect certain information such as: Device information, IP address, Browser type, Pages visited, Purchase history, and Browsing patterns.', 'This information helps us improve our services and provide a better user experience.'] },
+  { icon: '📄', title: '3. How We Use Your Information', content: ['Fizzy Fuzz may use your information for the following purposes: To process and deliver orders, to provide customer support, to send order updates and notifications, and to improve our products and services.', 'We also use your information to detect fraud or illegal activity, to send promotional offers and updates, and to personalize the shopping experience.'] },
+  { icon: '📱', title: '4. Device Permissions', content: ['With your permission, the Fizzy Fuzz app may request access to certain device features such as: Camera, Photo gallery, Location, Contacts, and Device information.', 'These permissions help provide certain features of the application. You may disable them at any time through your device settings.'] },
+  { icon: '🍪', title: '5. Cookies', content: ['Our platform may use cookies to improve your experience. Cookies are small files stored on your device that help us understand how users interact with the platform.', 'Cookies help us: Improve website performance, remember user preferences, analyze traffic, and provide personalized content.', 'You may disable cookies through your browser settings.'] },
+  { icon: '🔗', title: '6. Sharing of Information', content: ['Fizzy Fuzz may share your information with trusted partners such as: Sellers on the platform, Delivery partners, Payment service providers, and Technology partners.', 'This sharing helps us process orders and deliver services. We may also share information if required by law.'] },
+  { icon: '🌐', title: '7. Third-Party Services', content: ['Our platform may contain links to third-party websites or services. These websites have their own privacy policies. Fizzy Fuzz is not responsible for their privacy practices.', 'Users should review third-party privacy policies before providing personal information.'] },
+  { icon: '🔒', title: '8. Security of Information', content: ['We take reasonable security measures to protect your personal information. These measures include secure servers and restricted access to data.', 'However, internet data transmission cannot be guaranteed to be completely secure. Users are responsible for protecting their own login credentials.'] },
+  { icon: '👶', title: "9. Children's Privacy", content: ["Fizzy Fuzz services are intended only for users who are 18 years or older. We do not knowingly collect personal information from children under 18 years of age."] },
+  { icon: '🗄️', title: '10. Data Retention', content: ['We retain personal information only for as long as necessary. This may include purposes such as: Order processing, Legal compliance, Fraud prevention, and Business analysis.', 'We may keep anonymous data for research purposes.'] },
+  { icon: '✅', title: '11. Your Rights', content: ['You have the right to: Access your personal information, Update or correct your information, Request deletion of certain data, and Withdraw consent.', 'You may contact us for assistance regarding any of these requests.'] },
+  { icon: '🛡️', title: '12. Consent', content: ['By using the Fizzy Fuzz platform and providing personal information, you consent to the collection and use of your information according to this Privacy Policy.'] },
+  { icon: '🔄', title: '13. Changes to This Privacy Policy', content: ['Fizzy Fuzz may update this Privacy Policy from time to time. Any changes will be posted on our platform.', 'Users are encouraged to review this policy periodically to stay informed of any updates.'] },
+];
+
+// ── Terms sections ──
+const TC_SECTIONS = [
+  { icon: '✅', title: '1. Introduction & Acceptance', content: ["Welcome to FizzyFuzz. These Terms & Conditions ('Terms') govern your use of the FizzyFuzz platform, including the seller dashboard, buyer storefront, and all associated services ('Platform').", 'By registering as a seller or buyer on FizzyFuzz, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you do not agree to these Terms, you must immediately cease use of the Platform.', 'FizzyFuzz reserves the right to modify these Terms at any time. Continued use of the Platform after any such changes constitutes your acceptance of the new Terms.'] },
+  { icon: '🏪', title: '2. Seller Eligibility & Registration', content: ['To register as a seller on FizzyFuzz, you must be at least 18 years of age and a resident of India with a valid PAN or Aadhaar number.', 'Sellers must provide accurate and complete business information including GSTIN (if applicable), bank account details, and a valid KYC document at the time of registration.', 'FizzyFuzz reserves the right to reject any seller application or revoke seller status at its sole discretion if any information is found to be false, misleading, or in violation of these Terms.', 'Each individual or business entity is allowed only one seller account. Creating multiple accounts may result in permanent suspension.'] },
+  { icon: '📦', title: '3. Product Listings & Prohibited Items', content: ['Sellers are solely responsible for the accuracy, quality, and legality of their product listings. All product descriptions, images, and pricing must be truthful and not misleading.', "Sellers must not list counterfeit, pirated, stolen, or otherwise illegal products. Prohibited categories include but are not limited to: narcotics, weapons, adult content, endangered species products, and items banned under Indian law.", 'FizzyFuzz reserves the right to remove any listing and suspend any seller account found to be in violation of these guidelines without prior notice.', 'Sellers must ensure that their products comply with all applicable Indian laws including the Consumer Protection Act 2019, Legal Metrology Act, and Food Safety and Standards Act.'] },
+  { icon: '₹', title: '4. Pricing, Fees & Payouts', content: ['Sellers are free to set their own prices on the Platform. However, FizzyFuzz reserves the right to enforce a minimum or maximum price for certain categories to maintain competitive standards.', 'FizzyFuzz charges a platform commission on each completed sale. The commission rate varies by product category and will be clearly communicated to the seller prior to listing.', 'Payouts to sellers are processed on a weekly settlement cycle. Funds are transferred directly to the registered bank account within 7 business days of order completion.', 'FizzyFuzz deducts applicable TDS (Tax Deducted at Source) as required under Indian tax law before processing payout. Sellers are responsible for their own GST filings and tax obligations.'] },
+  { icon: '🚚', title: '5. Shipping & Order Fulfilment', content: ['Sellers are responsible for packing, labelling, and dispatching orders within the stipulated processing time as agreed upon at the time of registration.', "FizzyFuzz partners with third-party logistics providers for delivery. Sellers must ensure packages are securely packed and comply with the logistics provider's packaging guidelines.", 'In case of a failed delivery due to an incorrect or incomplete address provided by the buyer, the seller will be refunded the product value minus logistics charges.', 'Sellers must update the order status promptly on the Platform. Failure to dispatch within the agreed timeline may result in automatic order cancellation and negative impact on seller ratings.'] },
+  { icon: '↩️', title: '6. Returns, Refunds & Cancellations', content: ['FizzyFuzz operates a buyer-friendly return policy. Buyers may request a return within 7 days of delivery for eligible products. Sellers must accept valid return requests.', "In the event of a return, the refund to the buyer will be processed within 5–7 business days. The corresponding amount will be deducted from the seller's next payout cycle.", 'If a product is found to be damaged, defective, or significantly different from its listing, the seller bears full responsibility for the return logistics cost and full refund.', "Sellers may cancel an order prior to dispatch in exceptional circumstances. Repeated cancellations will negatively affect the seller's performance score and may lead to account suspension."] },
+  { icon: '⚠️', title: '7. Seller Responsibilities & Conduct', content: ['Sellers must maintain a minimum seller rating of 3.5 stars. Sellers falling below this threshold for two consecutive months may have their accounts reviewed or suspended.', 'Sellers are prohibited from engaging in fraudulent activity, price manipulation, fake reviews, or any conduct designed to deceive buyers or FizzyFuzz.', 'Sellers must not communicate with buyers outside the FizzyFuzz Platform for transactional purposes. Any attempt to divert sales off-platform is a violation of these Terms.', 'All communication with buyers must be professional, respectful, and in compliance with applicable laws. FizzyFuzz reserves the right to monitor and record such communications.'] },
+  { icon: '🔒', title: '8. Intellectual Property', content: ['All platform content, trademarks, logos, designs, and technology owned by FizzyFuzz are protected under applicable intellectual property laws. Sellers may not reproduce or misuse any such content.', 'By uploading product images, descriptions, or other content to the Platform, sellers grant FizzyFuzz a non-exclusive, royalty-free, worldwide licence to use such content for marketing and platform operations.', 'Sellers warrant that all content they upload does not infringe the intellectual property rights of any third party. FizzyFuzz shall not be liable for any third-party IP claims arising from seller content.'] },
+  { icon: '🚨', title: '9. Limitation of Liability', content: ['FizzyFuzz acts as an intermediary marketplace and is not the seller of record. FizzyFuzz is not liable for the quality, safety, legality, or delivery of products listed by sellers.', "To the maximum extent permitted by law, FizzyFuzz's total liability to any seller shall not exceed the total fees paid by that seller to FizzyFuzz in the 3 months preceding the claim.", 'FizzyFuzz is not liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or business opportunities.'] },
+  { icon: '🚫', title: '10. Account Suspension & Termination', content: ['FizzyFuzz reserves the right to suspend or permanently terminate any seller account that violates these Terms, engages in fraudulent conduct, or poses a risk to buyers or the Platform.', 'Upon termination, any pending payouts will be held for 30 days to process open disputes and returns. Remaining balances will be settled as per the standard payout schedule.', 'Sellers may request account deactivation at any time by contacting support. However, obligations arising from existing orders must be fulfilled prior to deactivation.'] },
+  { icon: '⚖️', title: '11. Governing Law & Dispute Resolution', content: ['These Terms shall be governed by and construed in accordance with the laws of India. Any disputes arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of courts in Bengaluru, Karnataka.', "FizzyFuzz encourages parties to resolve disputes amicably. In the event of a dispute, the aggrieved party must first raise the matter through FizzyFuzz's internal grievance redressal mechanism.", 'If a dispute cannot be resolved internally within 30 days, it shall be referred to binding arbitration under the Arbitration and Conciliation Act, 1996.'] },
+  { icon: '📞', title: '12. Contact & Grievance Officer', content: ['For any queries, complaints, or feedback regarding these Terms or the Platform, please contact our Seller Support team at support@fizzyfuzz.in.', 'In accordance with the Information Technology Act, 2000, our Grievance Officer can be reached at: grievance@fizzyfuzz.in. We endeavour to resolve all grievances within 30 days of receipt.', "FizzyFuzz's registered office is located in India. All formal legal notices must be addressed to the registered office address as listed on the Platform."] },
+  { icon: '🔄', title: '13. Amendments to Terms', content: ['FizzyFuzz reserves the right to update or amend these Terms at any time. Sellers will be notified of material changes via email or a prominent notice on the Platform.', 'Continued use of the Platform following the posting of revised Terms constitutes your acceptance of those changes. It is your responsibility to review these Terms periodically.'] },
+];
+
+// Build accordions
+buildAccordion('pp-accordion', PP_SECTIONS);
+buildAccordion('tc-accordion', TC_SECTIONS);
+
+// Scroll-to-top
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scrollTopBtn');
+  btn.classList.toggle('visible', window.scrollY > 300);
+});
+</script>
+</body>
+</html>
